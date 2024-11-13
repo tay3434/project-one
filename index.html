@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <base href="/">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="Description" content="Demonstration for project-one">
+  <title>Project One Demo</title>
+  <style>
+    :root, html, body {
+      margin: 0;
+      padding: 0;
+    }
+    #demo {
+      margin: var(--ddd-spacing-4);
+    }
+    project-one {
+      margin: var(--ddd-spacing-4);
+      border: var(--ddd-border-sm) var(--ddd-theme-default-slateLight);
+      border-radius: var(--ddd-radius-sm);
+    }
+    project-one:hover {
+      box-shadow: var(--ddd-boxShadow-md) var(--ddd-theme-default-navy40);
+    }
+    #example {
+      font-size: var(--ddd-font-weight-large);
+      background-color: var(--ddd-theme-default-limestoneMaxLight);
+      color: var(--ddd-theme-default-navy40);
+    }
+  </style>
+</head>
+<body>
+  <div id="demo">
+    <h1>Project One</h1>
+    <project-one json-url="https://example.com/site.json" title="Search HAX the Web"></project-one>
+  </div>
+  <script type="module" src="./project-one.js"></script>
+</body>
+</html>
+
