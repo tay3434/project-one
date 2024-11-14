@@ -2,6 +2,7 @@ import { LitElement, html, css } from "lit";
 import { DDDSuper } from "@haxtheweb/d-d-d/d-d-d.js";
 import { I18NMixin } from "@haxtheweb/i18n-manager/lib/I18NMixin.js";
 import "./project-card.js";
+import "./site-overview.js"; // Import SiteOverview component
 
 export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
   static get properties() {
@@ -9,6 +10,7 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
       title: { type: String },
       loading: { type: Boolean, reflect: true },
       items: { type: Array },
+      siteData: { type: Object },
       jsonUrl: { type: String, attribute: 'json-url' }
     };
   }
@@ -19,6 +21,7 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
     this.title = '';
     this.loading = false;
     this.jsonUrl = '';
+    this.siteData = null;
   }
 
   static get styles() {
@@ -34,6 +37,14 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
         justify-content: space-around;
         gap: var(--ddd-spacing-4);
         padding: var(--ddd-spacing-5);
+      }
+      .overview-container {
+        margin-bottom: var(--ddd-spacing-5);
+        background-color: var(--ddd-theme-default-lightGray);
+        padding: var(--ddd-spacing-4);
+        border-radius: var(--ddd-radius-md);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
       }
       .search-container {
         display: flex;
@@ -92,16 +103,35 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
         <button ?disabled="${!this.isValid}" @click="${this._analyze}">Analyze</button>
       </div>
 
+      ${this.siteData?.name
+        ? html`
+          <div class="overview-container">
+            <site-overview
+              title="${this.siteData.name}"
+              description="${this.siteData.description}"
+              logo="${this.siteData.logo || ''}"
+              created="${this.formatDate(this.siteData.metadata?.created)}"
+              updated="${this.formatDate(this.siteData.metadata?.updated)}"
+              hexCode="${this.siteData.hexCode || '#ffffff'}"
+              theme="${this.siteData.theme || ''}"
+              icon="${this.siteData.icon || ''}"
+              url="${this.siteData.url || '#'}">
+            </site-overview>
+          </div>`
+        : ''
+      }
+
       <div class="results">
         ${this.items.map(item => html`
           <project-card
-            tabindex="0"
+
             title="${item.title}"
             description="${item.description}"
             created="${this.formatDate(item.metadata?.created)}"
             lastUpdated="${this.formatDate(item.metadata?.updated)}"
-            logo="${item.metadata?.files?.[0]?.url || ''}"
+            logo="${this.getLogoUrl(item.metadata?.files?.[0]?.url)}"
             slug="${item.slug}"
+            url="${item.url}"
           ></project-card>
         `)}
       </div>
@@ -112,7 +142,7 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
     this.jsonUrl = e.target.value.trim();
     this.isValid = !!this.jsonUrl;
   }
-// enter sends search input through
+
   _handleKeydown(e) {
     if (e.key === 'Enter' && this.isValid) {
       this._analyze();
@@ -120,7 +150,6 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
   }
 
   async _analyze() {
-    // make sure the URL starts with "https://" and ends with "site.json"
     if (!this.jsonUrl.startsWith("http://") && !this.jsonUrl.startsWith("https://")) {
       this.jsonUrl = `https://${this.jsonUrl}`;
     }
@@ -152,10 +181,15 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
   processData(data) {
     this.items = data.items;
     this.title = data.name;
+    this.siteData = data; // Store site data for site overview
   }
 
   formatDate(timestamp) {
     return timestamp ? new Date(parseInt(timestamp) * 1000).toLocaleDateString() : '';
+  }
+
+  getLogoUrl(url) {
+    return url || 'https://via.placeholder.com/150';
   }
 
   static get tag() {
@@ -164,7 +198,4 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
 }
 
 customElements.define(ProjectOne.tag, ProjectOne);
-
-
-
 

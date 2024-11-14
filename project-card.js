@@ -10,7 +10,8 @@ export class ProjectCard extends DDDSuper(I18NMixin(LitElement)) {
       created: { type: String },
       lastUpdated: { type: String },
       logo: { type: String },
-      slug: { type: String }
+      slug: { type: String },
+      url: { type: String}
     };
   }
 
@@ -28,26 +29,18 @@ export class ProjectCard extends DDDSuper(I18NMixin(LitElement)) {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        box-sizing: border-box;
       }
       .card:hover, .card:focus{
         background-color: var(--ddd-theme-default-white);
       }
 
-      .image-container {
+      .image-container img{
         width: 100%;
         height: 200px;
-        overflow: hidden;
-        border-radius:  var(--ddd-radius-sm);
-      }
-      img {
-        width: 100%;
-        height: 100%;
         object-fit: cover;
-        border-radius: var(--ddd-radius-sm);
       }
       .info {
-        font-size: var(--ddd-font-weight-bold);
+        /* font-size: var(--ddd-font-weight-bold); */
         font-weight: var(--ddd-font-weight-bold); 
         text-align: center;
         /* line-height: var(-ddd-lh-120); */
@@ -69,7 +62,7 @@ export class ProjectCard extends DDDSuper(I18NMixin(LitElement)) {
     return html`
       <div class="card" @click="${this.openSlug}">
         <div class="image-container">
-          <img src="${this.logo || 'https://avatars.githubusercontent.com/u/12715666?s=200&v=4'}" alt="${this.title}" />
+          <img src="https://haxtheweb.org/${this.logo}" alt="${this.title}" />
         </div>
         <div class="info" @click="${this.openTitleLink}">${this.title}</div>
         <div class="description">${this.description}</div>
@@ -85,15 +78,18 @@ export class ProjectCard extends DDDSuper(I18NMixin(LitElement)) {
     }
   }
 
-  // click on title of card and be directed to associated site in new window
+  //click on title of card and be directed to associated site in new window
   openTitleLink(e) {
     e.stopPropagation(); 
     if (this.title) {
-      window.open(`https://haxtheweb.org/${this.title}`, '_blank');
+      window.open(`https://haxtheweb.org/${item.slug}`, '_blank');
     }
   }
 }
 
 customElements.define('project-card', ProjectCard);
+
+    
+
 
 

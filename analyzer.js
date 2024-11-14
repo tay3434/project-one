@@ -1,7 +1,8 @@
 import { LitElement, html, css } from "lit";
 import { DDDSuper } from "@haxtheweb/d-d-d/d-d-d.js";
 import { I18NMixin } from "@haxtheweb/i18n-manager/lib/I18NMixin.js";
-import "./project-card.js"; 
+import "./project-card.js";
+import "./site-overview.js"; // Ensure the site-overview is imported
 
 export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
   static get properties() {
@@ -19,7 +20,7 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
     this.url = '';
     this.isValid = false;
     this.items = [];
-    this.siteData = {};
+    this.siteData = null;
     this.placeholder = 'https://haxtheweb.org/site.json';
   }
 
@@ -43,6 +44,14 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
         padding: var(--ddd-spacing-3);
         border-radius: var(--ddd-radius-xs);
         border: var(--ddd-border-sm) var(--ddd-theme-default-slateLight) solid;
+      }
+      .overview-container {
+        margin-bottom: var(--ddd-spacing-5);
+        background-color: var(--ddd-theme-default-lightGray);
+        padding: var(--ddd-spacing-4);
+        border-radius: var(--ddd-radius-md);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
       }
       .results {
         display: flex;
@@ -72,17 +81,34 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
         />
         <button ?disabled="${!this.isValid}" @click="${this._analyze}">Analyze</button>
       </div>
-      
-      ${this.siteData.name ? this.renderOverview() : ''}
-      
+
+      ${this.siteData && this.siteData.name
+        ? html`
+          <div class="overview-container">
+            <site-overview 
+              title="${this.siteData.name}" 
+              description="${this.siteData.description}" 
+              logo="${this.siteData.logo || ''}" 
+              created="${this.formatDate(this.siteData.metadata?.created)}"
+              updated="${this.formatDate(this.siteData.metadata?.updated)}"
+              hexCode="${this.siteData.hexCode || '#ffffff'}"
+              theme="${this.siteData.theme || ''}"
+              icon="${this.siteData.icon || ''}"
+              url="${this.siteData.url || '#'}">
+            </site-overview>
+          </div>`
+        : ''
+      }
+
       <div class="results">
         ${this.items.map(item => html`
           <project-card
+            tabindex="0"
             title="${item.title}"
             description="${item.description}"
             created="${this.formatDate(item.metadata?.created)}"
             lastUpdated="${this.formatDate(item.metadata?.updated)}"
-            logo="${this.getLogoUrl(item.metadata?.files?.[0]?.url)}"
+            logo="${item.metadata?.files?.[0]?.url || ''}"
             slug="${item.slug}"
           ></project-card>
         `)}
@@ -91,7 +117,7 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
   }
 
   _updateUrl(e) {
-    this.url = e.target.value.trim();
+    this.url = e.target.value;
   }
 
   _handleKeydown(e) {
@@ -101,47 +127,34 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
   }
 
   async _analyze() {
-    if (!this.url.startsWith("https://") && !this.url.startsWith("http://")) {
-      this.url = `https://${this.url}`;
-    }
-
-    this.items = [];
-    this.siteData = {};
+    this.loading = true;
     try {
       const response = await fetch(this.url);
       const data = await response.json();
-      if (this.validateData(data)) {
-        this.siteData = data;
-        this.items = data.items || [];
+      if (this.validateSchema(data)) {
+        this.processData(data);
       } else {
-        alert("Invalid JSON schema.");
+        alert("Invalid JSON schema");
       }
     } catch (error) {
-      console.error("Error fetching or parsing data:", error);
-      alert("Failed to fetch or parse data.");
+      console.error("Error fetching data:", error);
+      alert("Invalid URL or network error");
+    } finally {
+      this.loading = false;
     }
   }
 
-  validateData(data) {
-    return data && data.name && data.description && Array.isArray(data.items) && data.items.length > 0;
+  validateSchema(data) {
+    return data && Array.isArray(data.items) && data.items.length > 0;
   }
 
-  renderOverview() {
-    return html`
-      <div class="overview">
-        <h3>${this.siteData.name}</h3>
-        <p>${this.siteData.description}</p>
-        <p>Created on: ${this.formatDate(this.siteData.created)}</p>
-      </div>
-    `;
+  processData(data) {
+    this.items = data.items;
+    this.siteData = data;
   }
 
   formatDate(timestamp) {
     return timestamp ? new Date(parseInt(timestamp) * 1000).toLocaleDateString() : '';
-  }
-
-  getLogoUrl(logoUrl) {
-    return logoUrl ? logoUrl : "https://via.placeholder.com/150";
   }
 
   static get tag() {
@@ -150,7 +163,4 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
 }
 
 customElements.define(Analyzer.tag, Analyzer);
-
-
-
 
