@@ -71,10 +71,11 @@ export class ProjectCard extends DDDSuper(I18NMixin(LitElement)) {
           display: flex;
           align-items: center;
           justify-content: center;
-          background-color: #f0f0f0;
-          color: #aaa;
-          font-size: 14px;
+          background-color: var(--ddd-theme-default-limestoneLight);
+          color: var(--ddd-theme-default-coalyGray);
+          font-size: var(--ddd-font-weight-regular);
           text-align: center;
+          font-family: var(--ddd-font-primary);
         }
       `
     ];

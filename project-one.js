@@ -43,12 +43,12 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
         padding: var(--ddd-spacing-5);
       }
       .overview-container {
-        margin-bottom: var(--ddd-spacing-5);
-        background-color: var(--ddd-theme-default-lightGray);
+        display: flex;
+        margin: 0 auto;
         padding: var(--ddd-spacing-4);
-        border-radius: var(--ddd-radius-md);
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         width: 100%;
+        align-items: center; 
+        justify-content: center;
       }
       .search-container {
         display: flex;
@@ -107,23 +107,24 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
         <button ?disabled="${!this.isValid}" @click="${this._analyze}">Analyze</button>
       </div>
 
-      ${this.siteData?.name
-        ? html`
+     ${this.data?.name
+        ? html` 
           <div class="overview-container">
-            <site-overview
-              title=${this.data.title}
-              description=${this.data.description}
-              logo=${this.jsonUrl}${this.data.metadata.site.logo}
-              created=${this.formatDate(this.data.metadata.site.created)}
-              updated=${this.formatDate(this.data.metadata.site.updated)}
-              hexCode=${this.data.metadata.theme.variables.hexCode}
-              theme=${this.data.metadata.theme.name}
-              icon=${this.data.metadata.theme.variables.icon}  
-              jsonUrl=${this.jsonUrl}
-            ></site-overview>
+          <site-overview
+              title="${this.data.name}"
+              description="${this.data.description}"
+              logo="${this.data.metadata.site.logo}"
+              created="${this.formatDate(this.data.metadata.site.created)}"
+              updated="${this.formatDate(this.data.metadata.site.updated)}"
+              hexCode="${this.data.metadata.theme.variables.hexCode}"
+              theme="${this.data.metadata.theme.name}"
+              icon="${this.data.metadata.theme.variables.icon}"
+              jsonUrl="${this.jsonUrl}"
+           
+          ></site-overview>
           </div>
-        ` : ''
-      }
+        ` : ""
+      } 
 
       <div class="results">
         ${this.items.length===0
@@ -142,7 +143,7 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
             readTime="${item.readTime}"
           ></project-card>
         `)}
-      </div>
+        </div>
     `;
   }
 
@@ -164,11 +165,13 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
     if (!this.jsonUrl.endsWith("site.json")) {
       this.jsonUrl = `${this.jsonUrl.replace(/\/?$/, '')}/site.json`;
     }
-
+  
     this.loading = true;
     try {
       const response = await fetch(this.jsonUrl);
       const data = await response.json();
+      console.log("Fetched data:", data);
+  
       if (this.validateSchema(data)) {
         this.processData(data);
       } else {
@@ -181,20 +184,34 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
       this.loading = false;
     }
   }
+  
 
   validateSchema(data) {
     return data && Array.isArray(data.items) && data.items.length > 0;
+    
   }
 
   processData(data) {
+    console.log("Processing data:", data);
+    
+    this.data = {
+      name: data.name || "Untitled Project",
+      description: data.description || "No description available",
+      metadata: {
+        site: data.metadata?.site || {},
+        theme: data.metadata?.theme || {}
+      }
+    };
+    
     this.items = data.items.map(item => ({
       ...item,
-      readTime: item.metadata.readtime || '', 
-      logo: data.metadata.site.logo 
+      readTime: item.metadata?.readtime || "Unknown",
+      logo: data.metadata?.site?.logo || ""
     }));
-    this.title = data.name;
-    this.data = data;
+  
+    this.title = this.data.name;
   }
+  
 
   formatDate(timestamp) {
     return timestamp ? new Date(parseInt(timestamp) * 1000).toLocaleDateString() : '';
@@ -210,4 +227,6 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
 }
 
 customElements.define(ProjectOne.tag, ProjectOne);
+
+
 
