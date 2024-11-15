@@ -2,15 +2,19 @@ import { LitElement, html, css } from "lit";
 import { DDDSuper } from "@haxtheweb/d-d-d/d-d-d.js";
 import { I18NMixin } from "@haxtheweb/i18n-manager/lib/I18NMixin.js";
 import "./project-card.js";
-import "./site-overview.js"; // Import SiteOverview component
+import "./site-overview.js"; 
+
+import '@haxtheweb/hax-iconset/hax-iconset.js';
+import '@haxtheweb/simple-icon/simple-icon.js';
 
 export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
+
   static get properties() {
     return {
       title: { type: String },
       loading: { type: Boolean, reflect: true },
       items: { type: Array },
-      siteData: { type: Object },
+      data: { type: Object },
       jsonUrl: { type: String, attribute: 'json-url' }
     };
   }
@@ -21,7 +25,7 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
     this.title = '';
     this.loading = false;
     this.jsonUrl = '';
-    this.siteData = null;
+    this.data = null;
   }
 
   static get styles() {
@@ -75,13 +79,13 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
         color: var(--ddd-theme-default-white);
         border: solid var(--ddd-theme-default-white);
       }
-      button:hover, button:focus{
+      button:hover, button:focus {
         background-color: var(--ddd-theme-default-alertImmediate);
       }
-      button[disabled]{
+      button[disabled] {
         opacity: 0.75;
       }
-      project-card:focus{
+      project-card:focus {
         outline: 2px solid var(--ddd-theme-default-athertonViolet);
         outline-offset: 2px;
         border-radius: var(--ddd-radius-md);
@@ -107,31 +111,35 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
         ? html`
           <div class="overview-container">
             <site-overview
-              title="${this.siteData.name}"
-              description="${this.siteData.description}"
-              logo="${this.siteData.logo || ''}"
-              created="${this.formatDate(this.siteData.metadata?.created)}"
-              updated="${this.formatDate(this.siteData.metadata?.updated)}"
-              hexCode="${this.siteData.hexCode || '#ffffff'}"
-              theme="${this.siteData.theme || ''}"
-              icon="${this.siteData.icon || ''}"
-              url="${this.siteData.url || '#'}">
-            </site-overview>
-          </div>`
-        : ''
+              title=${this.data.title}
+              description=${this.data.description}
+              logo=${this.jsonUrl}${this.data.metadata.site.logo}
+              created=${this.formatDate(this.data.metadata.site.created)}
+              updated=${this.formatDate(this.data.metadata.site.updated)}
+              hexCode=${this.data.metadata.theme.variables.hexCode}
+              theme=${this.data.metadata.theme.name}
+              icon=${this.data.metadata.theme.variables.icon}  
+              jsonUrl=${this.jsonUrl}
+            ></site-overview>
+          </div>
+        ` : ''
       }
 
       <div class="results">
-        ${this.items.map(item => html`
+        ${this.items.length===0
+          ? console.log('items empty')
+          : this.items.map(item => 
+          html`
           <project-card
-
             title="${item.title}"
             description="${item.description}"
-            created="${this.formatDate(item.metadata?.created)}"
-            lastUpdated="${this.formatDate(item.metadata?.updated)}"
+            created="${this.formatDate(item.metadata.created)}"
+            lastUpdated="${this.formatDate(item.metadata.updated)}"
             logo="${this.getLogoUrl(item.metadata?.files?.[0]?.url)}"
-            slug="${item.slug}"
-            url="${item.url}"
+            slug="https://haxtheweb.org/${item.slug} "
+            jsonUrl="${item.jsonUrl}"
+            indexSource="https://haxtheweb.org/${item.location}"
+            readTime="${item.readTime}"
           ></project-card>
         `)}
       </div>
@@ -179,17 +187,21 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
   }
 
   processData(data) {
-    this.items = data.items;
+    this.items = data.items.map(item => ({
+      ...item,
+      readTime: item.metadata.readtime || '', 
+      logo: data.metadata.site.logo 
+    }));
     this.title = data.name;
-    this.siteData = data; // Store site data for site overview
+    this.data = data;
   }
 
   formatDate(timestamp) {
     return timestamp ? new Date(parseInt(timestamp) * 1000).toLocaleDateString() : '';
   }
 
-  getLogoUrl(url) {
-    return url || 'https://via.placeholder.com/150';
+  getLogoUrl(jsonUrl) {
+    return jsonUrl;
   }
 
   static get tag() {

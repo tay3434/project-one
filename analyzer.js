@@ -28,7 +28,7 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
     return css`
       :host {
         display: block;
-        padding: var(--ddd-spacing-5); 
+        padding: var(--ddd-spacing-5);
       }
       .search-container {
         display: flex;
@@ -77,7 +77,7 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
           .value="${this.url}"
           placeholder="${this.placeholder}"
           @input="${this._updateUrl}"
-          @keydown="${this._handleKeydown}" 
+          @keydown="${this._handleKeydown}"
         />
         <button ?disabled="${!this.isValid}" @click="${this._analyze}">Analyze</button>
       </div>
@@ -85,10 +85,10 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
       ${this.siteData && this.siteData.name
         ? html`
           <div class="overview-container">
-            <site-overview 
-              title="${this.siteData.name}" 
-              description="${this.siteData.description}" 
-              logo="${this.siteData.logo || ''}" 
+            <site-overview
+              title="${this.siteData.name}"
+              description="${this.siteData.description}"
+              logo="${this.siteData.logo || ''}"
               created="${this.formatDate(this.siteData.metadata?.created)}"
               updated="${this.formatDate(this.siteData.metadata?.updated)}"
               hexCode="${this.siteData.hexCode || '#ffffff'}"
@@ -96,8 +96,8 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
               icon="${this.siteData.icon || ''}"
               url="${this.siteData.url || '#'}">
             </site-overview>
-          </div>`
-        : ''
+          </div>
+        ` : ''
       }
 
       <div class="results">
@@ -110,6 +110,8 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
             lastUpdated="${this.formatDate(item.metadata?.updated)}"
             logo="${item.metadata?.files?.[0]?.url || ''}"
             slug="${item.slug}"
+            indexSource="${this.url}${item.location}"
+            readTime="${item.metadata?.readTime || ''}"
           ></project-card>
         `)}
       </div>
@@ -163,4 +165,6 @@ export class Analyzer extends DDDSuper(I18NMixin(LitElement)) {
 }
 
 customElements.define(Analyzer.tag, Analyzer);
+
+
 
