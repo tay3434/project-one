@@ -67,7 +67,7 @@ export class SiteOverview extends DDDSuper(I18NMixin(LitElement)) {
 
         <div class="text-container">
           <div class="title">
-            <a href="${this.jsonUrl}" target="_blank" rel="noopener noreferrer">
+            <a href="https://haxtheweb.org/${this.slug}" target="_blank" rel="noopener noreferrer">
               ${this.icon ? html`<simple-icon icon="${this.icon}"></simple-icon>` : ""}
               ${this.title}
             </a>

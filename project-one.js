@@ -119,17 +119,14 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
               hexCode="${this.data.metadata.theme.variables.hexCode}"
               theme="${this.data.metadata.theme.name}"
               icon="${this.data.metadata.theme.variables.icon}"
-              jsonUrl="${this.jsonUrl}"
-           
+              jsonUrl="${this.jsonUrl}"   
           ></site-overview>
           </div>
         ` : ""
       } 
 
-      <div class="results">
-        ${this.items.length===0
-          ? console.log('items empty')
-          : this.items.map(item => 
+          <div class="results">
+        ${this.items.map(item => 
           html`
           <project-card
             title="${item.title}"
@@ -137,9 +134,9 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
             created="${this.formatDate(item.metadata.created)}"
             lastUpdated="${this.formatDate(item.metadata.updated)}"
             logo="${this.getLogoUrl(item.metadata?.files?.[0]?.url)}"
-            slug="https://haxtheweb.org/${item.slug} "
+            slug="https://haxtheweb.org/${item.slug}"
+            location="https://haxtheweb.org/${item.location}"
             jsonUrl="${item.jsonUrl}"
-            indexSource="https://haxtheweb.org/${item.location}"
             readTime="${item.readTime}"
           ></project-card>
         `)}
@@ -195,7 +192,7 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
     console.log("Processing data:", data);
     
     this.data = {
-      name: data.name || "Untitled Project",
+      name: data.title || "No Title Provided",
       description: data.description || "No description available",
       metadata: {
         site: data.metadata?.site || {},
@@ -209,7 +206,6 @@ export class ProjectOne extends DDDSuper(I18NMixin(LitElement)) {
       logo: data.metadata?.site?.logo || ""
     }));
   
-    this.title = this.data.name;
   }
   
 

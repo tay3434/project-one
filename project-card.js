@@ -12,7 +12,7 @@ export class ProjectCard extends DDDSuper(I18NMixin(LitElement)) {
       logo: { type: String },
       slug: { type: String },
       jsonUrl: { type: String },
-      indexSource: { type: String },
+      location: { type: String },
       readTime: { type: String }
     };
   }
@@ -80,33 +80,63 @@ export class ProjectCard extends DDDSuper(I18NMixin(LitElement)) {
       `
     ];
   }
-
   render() {
     return html`
-      <div class="card" @click="${this.openSlug}">
+         <div
+        class="card"
+        @click="${this.openSlug}"
+        @keydown="${this.handleKeydown}"
+        tabindex="0"
+        aria-label="${this.title}"
+        >
         <div class="image-container">
-          ${this.logo
+        ${this.logo
             ? html`<img src="https://haxtheweb.org/${this.logo}"  alt="${this.title}" />`
             : html`<div class="placeholder">No Image</div>`
           }
         </div>
+
         <div class="info">
-          <a href="https://haxtheweb.org/${this.slug}" target="_blank">${this.title}</a>
+          <a href="${this.slug.startsWith('http') ? this.slug : `https://haxtheweb.org/${this.slug}`}" target="_blank"  @click="${this.stopPropagation}">${this.title}</a>
         </div>
+
         <div class="description">${this.description}</div>
         <div class="created">Created: ${this.created}</div>
-        <div class="lastUpdated">Updated: ${this.lastUpdated}</div>
-        <div class="lastUpdated"><a href="${this.indexSource}" target="_blank">Index Source</a></div>
-        <div class="lastUpdated">Read Time: ${this.readTime} minutes</div>
+        <div class="lastUpdated">Last Updated: ${this.lastUpdated}</div>
+        <div class="lastUpdated">Estimated Read Time: ${this.readTime}</div>
+
+        <div class="info">
+          <a href="${this.location}" target="_blank" @click="${this.stopPropagation}">Index Source</a>
+        </div>
       </div>
     `;
   }
 
-  openSlug() {
+  openSlug(event) {
     if (this.slug) {
-      window.open(this.slug, '_blank');
+      const url = this.slug.startsWith("http")
+        ? this.slug
+        : `https://haxtheweb.org/${this.slug}`;
+      console.log("Navigating to:", url); // Debug log
+      window.open(url, "_blank");
+    } else {
+      console.error("Slug is not defined!"); // Debug error log
     }
   }
+
+  handleKeydown(event) {
+    if (event.key === "Enter" || event.key === " ") {
+      this.openSlug();
+    }
+  }
+
+  stopPropagation(event) {
+    event.stopPropagation();
+  }
+
+static get tag() {
+  return "project-card";
+}
 }
 
 customElements.define('project-card', ProjectCard);
